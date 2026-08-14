@@ -1,0 +1,153 @@
+:root,
+[data-theme='light'] {
+  --paper: #f3efe6;
+  --paper-deep: #e7e0d2;
+  --paper-lift: #f7f3ea;
+  --board: #fbf8f1;
+  --ink: #1c1a16;
+  --ink-strong: #111111;
+  --ink-muted: #6a6458;
+  --line: #2a2620;
+  --line-soft: #b7af9f;
+  --accent: #2f5d50;
+  --accent-soft: rgba(47, 93, 80, 0.22);
+  --accent-press: rgba(47, 93, 80, 0.06);
+  --surface: rgba(255, 255, 255, 0.55);
+  --surface-strong: rgba(255, 255, 255, 0.65);
+  --glow: rgba(255, 255, 255, 0.55);
+  --app-end: #ebe4d6;
+  --error: #8b2e2e;
+  --error-mark: #a83232;
+  --overlay: rgba(28, 26, 22, 0.35);
+  --sheet-shadow: 0 -8px 28px rgba(28, 26, 22, 0.12);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --paper: #1a1814;
+  --paper-deep: #12100e;
+  --paper-lift: #221f1a;
+  --board: #24211c;
+  --ink: #ebe4d6;
+  --ink-strong: #f5f0e6;
+  --ink-muted: #a39a88;
+  --line: #d9d0bf;
+  --line-soft: #5c564a;
+  --accent: #7eb5a4;
+  --accent-soft: rgba(126, 181, 164, 0.22);
+  --accent-press: rgba(126, 181, 164, 0.1);
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-strong: rgba(255, 255, 255, 0.09);
+  --glow: rgba(255, 255, 255, 0.05);
+  --app-end: #141210;
+  --error: #e08a8a;
+  --error-mark: #ef9a9a;
+  --overlay: rgba(0, 0, 0, 0.55);
+  --sheet-shadow: 0 -8px 28px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+.app {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: calc(0.65rem + var(--safe-top)) calc(0.75rem + var(--safe-right))
+    calc(0.85rem + var(--safe-bottom)) calc(0.75rem + var(--safe-left));
+  max-width: 28rem;
+  margin: 0 auto;
+  overflow-x: clip;
+  background:
+    radial-gradient(ellipse at top, var(--glow), transparent 55%),
+    linear-gradient(180deg, var(--paper-lift) 0%, var(--paper) 40%, var(--app-end) 100%);
+  color: var(--ink);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.controls button,
+.controls select {
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.difficulty {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+.difficulty-label {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.difficulty select {
+  border: 1px solid var(--line-soft);
+  background: var(--surface);
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  min-height: 2.25rem;
+  color: var(--ink);
+}
+
+.new-puzzle {
+  border: 1px solid var(--line-soft);
+  background: var(--surface);
+  border-radius: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  min-height: 2.25rem;
+  font-size: 0.85rem;
+}
+
+.new-puzzle:active {
+  background: var(--paper-deep);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.status-msg {
+  text-align: center;
+  color: var(--ink-muted);
+  margin: 2rem 0;
+}
+
+.status-msg.is-error {
+  color: var(--error);
+}
+
+.win-banner {
+  text-align: center;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}

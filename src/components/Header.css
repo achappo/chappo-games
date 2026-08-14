@@ -1,0 +1,42 @@
+.game-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.header-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.header-score {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.header-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.header-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.25rem;
+  line-height: 1.1;
+  font-weight: 600;
+}

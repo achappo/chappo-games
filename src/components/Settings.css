@@ -1,0 +1,122 @@
+.settings-cog {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  border: 1px solid transparent;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.settings-cog:active,
+.settings-cog:focus-visible {
+  color: var(--ink);
+  background: var(--surface);
+  border-color: var(--line-soft);
+}
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--overlay);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+.settings-sheet {
+  width: min(28rem, 100%);
+  background: var(--paper-lift);
+  color: var(--ink);
+  border-radius: 1rem 1rem 0 0;
+  padding: 1rem 1.1rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  box-shadow: var(--sheet-shadow);
+  border-top: 1px solid var(--line-soft);
+}
+
+.settings-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.settings-sheet-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.settings-close {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.settings-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.settings-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.settings-name {
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.settings-desc {
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--ink-muted);
+}
+
+.settings-row input[type='checkbox'] {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-top: 0.15rem;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  border: 1px solid transparent;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.theme-toggle:active,
+.theme-toggle:focus-visible {
+  color: var(--ink);
+  background: var(--surface);
+  border-color: var(--line-soft);
+}

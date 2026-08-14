@@ -1,0 +1,38 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  font-family: 'Source Sans 3', 'Segoe UI', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--paper, #f3efe6);
+  color: var(--ink, #1c1a16);
+  overscroll-behavior: none;
+}
+
+button,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}

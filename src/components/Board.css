@@ -1,0 +1,111 @@
+.board-frame {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
+  position: relative;
+}
+
+.board {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  grid-template-rows: repeat(9, minmax(0, 1fr));
+  border: 2.5px solid var(--line);
+  background: var(--board);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  font-size: clamp(0.95rem, 4vw, 1.4rem);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink);
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.cell:nth-child(9n) {
+  border-right: none;
+}
+
+.cell:nth-child(n + 73) {
+  border-bottom: none;
+}
+
+.cell.thick-right {
+  border-right: 2px solid var(--line);
+}
+
+.cell.thick-bottom {
+  border-bottom: 2px solid var(--line);
+}
+
+.cell.is-given {
+  color: var(--ink-strong);
+  font-weight: 700;
+}
+
+.cell:not(.is-given):active {
+  background: var(--accent-press);
+}
+
+.cell.is-digit-match {
+  box-shadow: inset 0 0 0 2px var(--accent);
+  background: var(--accent-soft);
+}
+
+.cell-value {
+  pointer-events: none;
+}
+
+.cell-value.is-empty {
+  visibility: hidden;
+}
+
+.cell-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35em;
+  font-weight: 700;
+  color: var(--error-mark);
+  pointer-events: none;
+  animation: error-fade 0.55s ease-in-out both;
+}
+
+@keyframes error-fade {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
