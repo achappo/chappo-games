@@ -10,6 +10,13 @@ import {
   type LoadedPuzzle,
 } from './lib/puzzles'
 import {
+  liveScore,
+  loadScores,
+  recordScore,
+  saveScores,
+  type RecordResult,
+} from './lib/scores'
+import {
   applyTheme,
   loadSettings,
   saveSettings,
@@ -58,6 +65,9 @@ export default function App() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [settings, setSettings] = useState<Settings>(() => loadSettings())
+  const [mistakes, setMistakes] = useState(0)
+  const [scores, setScores] = useState(() => loadScores())
+  const [lastWin, setLastWin] = useState<RecordResult | null>(null)
 
   useEffect(() => {
     applyTheme(settings.theme)
@@ -81,6 +91,8 @@ export default function App() {
     setLoadError(null)
     setActiveDigit(null)
     setErrorCell(null)
+    setMistakes(0)
+    setLastWin(null)
     reset()
     try {
       const next = await pickPuzzle(level)
@@ -126,6 +138,7 @@ export default function App() {
 
     if (puzzle.solution[r][c] !== activeDigit) {
       setErrorCell({ r, c })
+      setMistakes((count) => count + 1)
       return
     }
 
@@ -141,15 +154,23 @@ export default function App() {
     }
 
     if (isComplete(next)) {
+      const result = recordScore(scores, puzzle.difficulty, seconds, mistakes)
+      saveScores(result.board)
+      setScores(result.board)
+      setLastWin(result)
       setStatus('won')
     }
   }
+
+  const score =
+    lastWin?.entry.score ??
+    (puzzle ? liveScore(puzzle.difficulty, seconds, mistakes) : 0)
 
   return (
     <div className="app">
       <Header
         timeLabel={formatTime(seconds)}
-        score={0}
+        score={score}
         theme={settings.theme}
         onThemeChange={(theme) =>
           handleSettingsChange({ ...settings, theme })
@@ -193,9 +214,15 @@ export default function App() {
               errorCell={errorCell}
               onCellTap={handleCellTap}
             />
-            {status === 'won' && (
+            {status === 'won' && lastWin && (
               <p className="win-banner" role="status">
-                Complete — {formatTime(seconds)}
+                Complete — {formatTime(lastWin.entry.seconds)} ·{' '}
+                {lastWin.entry.score.toLocaleString()}
+                {lastWin.isNewBest
+                  ? ' · New best'
+                  : lastWin.rank
+                    ? ` · #${lastWin.rank}`
+                    : ''}
               </p>
             )}
           </>
@@ -213,6 +240,7 @@ export default function App() {
         settings={settings}
         onClose={() => setSettingsOpen(false)}
         onChange={handleSettingsChange}
+        scores={scores}
       />
     </div>
   )

@@ -29,7 +29,7 @@ export function Header({
       </div>
       <div className="header-side header-score">
         <span className="header-label">Score</span>
-        <span className="header-value">{score}</span>
+        <span className="header-value">{score.toLocaleString()}</span>
       </div>
     </header>
   )

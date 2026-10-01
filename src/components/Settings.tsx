@@ -1,16 +1,51 @@
+import type { Difficulty } from '../lib/puzzles'
+import {
+  DIFFICULTY_LABELS,
+  type ScoreBoard,
+  type ScoreEntry,
+} from '../lib/scores'
 import type { Settings, Theme } from '../lib/settings'
+import { formatTime } from '../lib/sudoku'
 import './Settings.css'
 
 interface SettingsPanelProps {
   open: boolean
   settings: Settings
+  scores: ScoreBoard
   onClose: () => void
   onChange: (next: Settings) => void
+}
+
+const DIFFICULTY_ORDER: Difficulty[] = ['easy', 'medium', 'hard']
+
+function mistakesLabel(count: number): string {
+  return count === 1 ? '1 mistake' : `${count} mistakes`
+}
+
+function ScoreList({ entries }: { entries: ScoreEntry[] }) {
+  if (entries.length === 0) {
+    return <p className="scores-empty">No scores yet</p>
+  }
+
+  return (
+    <ol className="scores-list">
+      {entries.map((entry, index) => (
+        <li key={`${entry.completedAt}-${index}`} className="scores-row">
+          <span className="scores-rank">{index + 1}</span>
+          <span className="scores-points">{entry.score.toLocaleString()}</span>
+          <span className="scores-meta">
+            {formatTime(entry.seconds)} · {mistakesLabel(entry.mistakes)}
+          </span>
+        </li>
+      ))}
+    </ol>
+  )
 }
 
 export function SettingsPanel({
   open,
   settings,
+  scores,
   onClose,
   onChange,
 }: SettingsPanelProps) {
@@ -55,6 +90,19 @@ export function SettingsPanel({
             }
           />
         </label>
+
+        <section className="scores-section" aria-labelledby="high-scores-title">
+          <h3 id="high-scores-title" className="scores-heading">
+            High scores
+          </h3>
+          <p className="scores-desc">Top five on this device, by difficulty.</p>
+          {DIFFICULTY_ORDER.map((level) => (
+            <div key={level} className="scores-group">
+              <h4 className="scores-difficulty">{DIFFICULTY_LABELS[level]}</h4>
+              <ScoreList entries={scores[level]} />
+            </div>
+          ))}
+        </section>
       </div>
     </div>
   )
