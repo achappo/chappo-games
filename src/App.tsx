@@ -77,14 +77,14 @@ export default function App() {
   const { seconds, reset } = useTimer(playing)
 
   const finishedDigits = useMemo(() => {
-    const hidden = new Set<Digit>()
-    if (!grid || !settings.hideFinishedNumbers) return hidden
+    const finished = new Set<Digit>()
+    if (!grid) return finished
     const counts = countDigits(grid)
     for (const d of [1, 2, 3, 4, 5, 6, 7, 8, 9] as Digit[]) {
-      if (counts[d] >= 9) hidden.add(d)
+      if (counts[d] >= 9) finished.add(d)
     }
-    return hidden
-  }, [grid, settings.hideFinishedNumbers])
+    return finished
+  }, [grid])
 
   const startPuzzle = useCallback(async (level: Difficulty) => {
     setStatus('loading')
@@ -146,11 +146,9 @@ export default function App() {
     next[r][c] = activeDigit
     setGrid(next)
 
-    if (settings.hideFinishedNumbers) {
-      const counts = countDigits(next)
-      if (counts[activeDigit] >= 9) {
-        setActiveDigit(null)
-      }
+    const counts = countDigits(next)
+    if (counts[activeDigit] >= 9) {
+      setActiveDigit(null)
     }
 
     if (isComplete(next)) {
@@ -231,15 +229,13 @@ export default function App() {
 
       <NumberPad
         activeDigit={activeDigit}
-        hiddenDigits={finishedDigits}
+        finishedDigits={finishedDigits}
         onSelect={handleSelectDigit}
       />
 
       <SettingsPanel
         open={settingsOpen}
-        settings={settings}
         onClose={() => setSettingsOpen(false)}
-        onChange={handleSettingsChange}
         scores={scores}
       />
     </div>

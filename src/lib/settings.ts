@@ -1,13 +1,10 @@
 export type Theme = 'light' | 'dark'
 
 export interface Settings {
-  /** Hide pad digits once all nine of that number are placed. */
-  hideFinishedNumbers: boolean
   theme: Theme
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  hideFinishedNumbers: false,
   theme: 'light',
 }
 
@@ -19,7 +16,6 @@ export function loadSettings(): Settings {
     if (!raw) return { ...DEFAULT_SETTINGS }
     const parsed = JSON.parse(raw) as Partial<Settings>
     return {
-      hideFinishedNumbers: Boolean(parsed.hideFinishedNumbers),
       theme: parsed.theme === 'dark' ? 'dark' : 'light',
     }
   } catch {

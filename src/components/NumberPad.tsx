@@ -3,7 +3,7 @@ import './NumberPad.css'
 
 interface NumberPadProps {
   activeDigit: Digit | null
-  hiddenDigits?: ReadonlySet<Digit>
+  finishedDigits?: ReadonlySet<Digit>
   onSelect: (digit: Digit) => void
 }
 
@@ -11,14 +11,14 @@ const DIGITS: Digit[] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 export function NumberPad({
   activeDigit,
-  hiddenDigits,
+  finishedDigits,
   onSelect,
 }: NumberPadProps) {
   return (
     <div className="number-pad" role="toolbar" aria-label="Choose a number">
       {DIGITS.map((digit) => {
-        const hidden = hiddenDigits?.has(digit) ?? false
-        const active = !hidden && activeDigit === digit
+        const finished = finishedDigits?.has(digit) ?? false
+        const active = !finished && activeDigit === digit
         return (
           <button
             key={digit}
@@ -26,16 +26,18 @@ export function NumberPad({
             className={[
               'number-tile',
               active ? 'is-active' : '',
-              hidden ? 'is-hidden' : '',
+              finished ? 'is-finished' : '',
             ]
               .filter(Boolean)
               .join(' ')}
             aria-pressed={active}
-            aria-hidden={hidden}
-            tabIndex={hidden ? -1 : 0}
-            disabled={hidden}
+            aria-label={
+              finished ? `${digit}, all placed` : undefined
+            }
+            tabIndex={finished ? -1 : 0}
+            disabled={finished}
             onClick={() => {
-              if (!hidden) onSelect(digit)
+              if (!finished) onSelect(digit)
             }}
           >
             <span className="number-tile-label">{digit}</span>

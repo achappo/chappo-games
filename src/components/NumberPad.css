@@ -47,10 +47,11 @@
   background: var(--paper-deep);
 }
 
-.number-tile.is-hidden {
-  opacity: 0;
-  pointer-events: none;
-  border-color: transparent;
-  background: transparent;
+.number-tile.is-finished {
+  opacity: 0.38;
+  color: var(--ink-muted);
+  background: var(--paper-deep);
+  border-color: var(--line-soft);
   box-shadow: none;
+  cursor: default;
 }

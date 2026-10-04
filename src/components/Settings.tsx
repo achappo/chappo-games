@@ -4,16 +4,14 @@ import {
   type ScoreBoard,
   type ScoreEntry,
 } from '../lib/scores'
-import type { Settings, Theme } from '../lib/settings'
+import type { Theme } from '../lib/settings'
 import { formatTime } from '../lib/sudoku'
 import './Settings.css'
 
 interface SettingsPanelProps {
   open: boolean
-  settings: Settings
   scores: ScoreBoard
   onClose: () => void
-  onChange: (next: Settings) => void
 }
 
 const DIFFICULTY_ORDER: Difficulty[] = ['easy', 'medium', 'hard']
@@ -44,10 +42,8 @@ function ScoreList({ entries }: { entries: ScoreEntry[] }) {
 
 export function SettingsPanel({
   open,
-  settings,
   scores,
   onClose,
-  onChange,
 }: SettingsPanelProps) {
   if (!open) return null
 
@@ -71,25 +67,6 @@ export function SettingsPanel({
             ✕
           </button>
         </div>
-
-        <label className="settings-row">
-          <div className="settings-copy">
-            <span className="settings-name">Hide finished numbers</span>
-            <span className="settings-desc">
-              Drop a pad digit once all nine of that number are on the board
-            </span>
-          </div>
-          <input
-            type="checkbox"
-            checked={settings.hideFinishedNumbers}
-            onChange={(e) =>
-              onChange({
-                ...settings,
-                hideFinishedNumbers: e.target.checked,
-              })
-            }
-          />
-        </label>
 
         <section className="scores-section" aria-labelledby="high-scores-title">
           <h3 id="high-scores-title" className="scores-heading">
