@@ -1,3 +1,39 @@
+.pad-dock {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.pencil-toggle {
+  align-self: flex-start;
+  border: 1.5px solid var(--line-soft);
+  background: var(--surface-strong);
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  min-height: 2.15rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.pencil-toggle.is-active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
 .number-pad {
   display: flex;
   align-items: stretch;
@@ -6,8 +42,6 @@
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  padding-top: 0.25rem;
-  flex-shrink: 0;
 }
 
 .number-tile {
@@ -41,6 +75,11 @@
   box-shadow: inset 0 0 0 2px var(--accent);
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+.number-pad.is-pencil .number-tile.is-active {
+  background: var(--paper-lift);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
 }
 
 .number-tile:active:not(:disabled) {

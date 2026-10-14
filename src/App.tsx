@@ -5,6 +5,12 @@ import { NumberPad } from './components/NumberPad'
 import { SettingsPanel } from './components/Settings'
 import { useTimer } from './hooks/useTimer'
 import {
+  clearSavedGame,
+  loadSavedGame,
+  saveGame,
+} from './lib/game'
+import { clearNotesForPlacement, emptyNotes, toggleNote } from './lib/notes'
+import {
   pickPuzzle,
   type Difficulty,
   type LoadedPuzzle,
@@ -54,18 +60,31 @@ function countDigits(grid: Grid): Record<Digit, number> {
 }
 
 export default function App() {
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium')
-  const [puzzle, setPuzzle] = useState<LoadedPuzzle | null>(null)
-  const [grid, setGrid] = useState<Grid | null>(null)
-  const [activeDigit, setActiveDigit] = useState<Digit | null>(null)
+  const [restored] = useState(() => loadSavedGame())
+  const [difficulty, setDifficulty] = useState<Difficulty>(
+    () => restored?.puzzle.difficulty ?? 'medium',
+  )
+  const [puzzle, setPuzzle] = useState<LoadedPuzzle | null>(
+    () => restored?.puzzle ?? null,
+  )
+  const [grid, setGrid] = useState<Grid | null>(() => restored?.grid ?? null)
+  const [notes, setNotes] = useState(() => restored?.notes ?? emptyNotes())
+  const [activeDigit, setActiveDigit] = useState<Digit | null>(
+    () => restored?.activeDigit ?? null,
+  )
+  const [pencilMode, setPencilMode] = useState(
+    () => restored?.pencilMode ?? false,
+  )
   const [errorCell, setErrorCell] = useState<{ r: number; c: number } | null>(
     null,
   )
-  const [status, setStatus] = useState<Status>('loading')
+  const [status, setStatus] = useState<Status>(() =>
+    restored ? 'ready' : 'loading',
+  )
   const [loadError, setLoadError] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [settings, setSettings] = useState<Settings>(() => loadSettings())
-  const [mistakes, setMistakes] = useState(0)
+  const [mistakes, setMistakes] = useState(() => restored?.mistakes ?? 0)
   const [scores, setScores] = useState(() => loadScores())
   const [lastWin, setLastWin] = useState<RecordResult | null>(null)
 
@@ -74,7 +93,7 @@ export default function App() {
   }, [settings.theme])
 
   const playing = status === 'ready'
-  const { seconds, reset } = useTimer(playing)
+  const { seconds, reset } = useTimer(playing, restored?.seconds ?? 0)
 
   const finishedDigits = useMemo(() => {
     const finished = new Set<Digit>()
@@ -90,9 +109,12 @@ export default function App() {
     setStatus('loading')
     setLoadError(null)
     setActiveDigit(null)
+    setPencilMode(false)
     setErrorCell(null)
     setMistakes(0)
     setLastWin(null)
+    setNotes(emptyNotes())
+    clearSavedGame()
     reset()
     try {
       const next = await pickPuzzle(level)
@@ -106,8 +128,24 @@ export default function App() {
   }, [reset])
 
   useEffect(() => {
+    if (restored) return
     void startPuzzle(difficulty)
-  }, [difficulty, startPuzzle])
+    // First visit only; later games come from New puzzle / difficulty.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (status !== 'ready' || !puzzle || !grid) return
+    saveGame({
+      puzzle,
+      grid,
+      notes,
+      seconds,
+      mistakes,
+      pencilMode,
+      activeDigit,
+    })
+  }, [status, puzzle, grid, notes, seconds, mistakes, pencilMode, activeDigit])
 
   useEffect(() => {
     if (!errorCell) return
@@ -125,6 +163,11 @@ export default function App() {
     setActiveDigit(digit)
   }
 
+  function handleDifficultyChange(level: Difficulty) {
+    setDifficulty(level)
+    void startPuzzle(level)
+  }
+
   function handleCellTap(r: number, c: number) {
     if (!puzzle || !grid || (status !== 'ready' && status !== 'won')) return
 
@@ -136,6 +179,11 @@ export default function App() {
 
     if (status !== 'ready' || activeDigit === null) return
 
+    if (pencilMode) {
+      setNotes((current) => toggleNote(current, r, c, activeDigit))
+      return
+    }
+
     if (puzzle.solution[r][c] !== activeDigit) {
       setErrorCell({ r, c })
       setMistakes((count) => count + 1)
@@ -145,6 +193,9 @@ export default function App() {
     const next = cloneGrid(grid)
     next[r][c] = activeDigit
     setGrid(next)
+    setNotes((current) =>
+      clearNotesForPlacement(current, r, c, activeDigit),
+    )
 
     const counts = countDigits(next)
     if (counts[activeDigit] >= 9) {
@@ -157,6 +208,7 @@ export default function App() {
       setScores(result.board)
       setLastWin(result)
       setStatus('won')
+      clearSavedGame()
     }
   }
 
@@ -181,7 +233,9 @@ export default function App() {
           <span className="difficulty-label">Difficulty</span>
           <select
             value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+            onChange={(e) =>
+              handleDifficultyChange(e.target.value as Difficulty)
+            }
             aria-label="Difficulty"
           >
             <option value="easy">Easy</option>
@@ -208,6 +262,7 @@ export default function App() {
             <Board
               grid={grid}
               givens={puzzle.givens}
+              notes={notes}
               activeDigit={activeDigit}
               errorCell={errorCell}
               onCellTap={handleCellTap}
@@ -230,7 +285,9 @@ export default function App() {
       <NumberPad
         activeDigit={activeDigit}
         finishedDigits={finishedDigits}
+        pencilMode={pencilMode}
         onSelect={handleSelectDigit}
+        onTogglePencil={() => setPencilMode((on) => !on)}
       />
 
       <SettingsPanel

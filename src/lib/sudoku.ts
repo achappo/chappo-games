@@ -21,6 +21,10 @@ export function cloneGrid(grid: Grid): Grid {
   return grid.map((row) => [...row])
 }
 
+export function stringifyGrid(grid: Grid): string {
+  return grid.map((row) => row.join('')).join('')
+}
+
 function bit(d: number): number {
   return 1 << d
 }

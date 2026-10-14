@@ -1,17 +1,26 @@
+import type { NotesGrid } from '../lib/notes'
 import type { CellValue, Digit, Grid } from '../lib/sudoku'
 import './Board.css'
+
+const NOTE_DIGITS: Digit[] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 interface BoardProps {
   grid: Grid
   givens: Grid
+  notes: NotesGrid
   activeDigit: Digit | null
   errorCell: { r: number; c: number } | null
   onCellTap: (r: number, c: number) => void
 }
 
+function notesLabel(marks: Digit[]): string {
+  return marks.length === 0 ? 'empty' : `notes ${marks.join(' ')}`
+}
+
 export function Board({
   grid,
   givens,
+  notes,
   activeDigit,
   errorCell,
   onCellTap,
@@ -22,6 +31,7 @@ export function Board({
         {grid.map((row, r) =>
           row.map((value, c) => {
             const given = givens[r][c] !== 0
+            const marks = notes[r][c]
             const highlighted =
               activeDigit !== null && value === (activeDigit as CellValue)
             const showError = errorCell?.r === r && errorCell?.c === c
@@ -37,6 +47,7 @@ export function Board({
                   'cell',
                   given ? 'is-given' : '',
                   highlighted ? 'is-digit-match' : '',
+                  value === 0 && marks.length > 0 ? 'has-notes' : '',
                   thickRight ? 'thick-right' : '',
                   thickBottom ? 'thick-bottom' : '',
                 ]
@@ -45,7 +56,7 @@ export function Board({
                 aria-label={
                   value
                     ? `Row ${r + 1} column ${c + 1}, ${value}${given ? ', given' : ''}. Select ${value}`
-                    : `Row ${r + 1} column ${c + 1}, empty`
+                    : `Row ${r + 1} column ${c + 1}, ${notesLabel(marks)}`
                 }
                 onClick={() => onCellTap(r, c)}
               >
@@ -55,6 +66,27 @@ export function Board({
                 >
                   {value === 0 ? '0' : value}
                 </span>
+                {value === 0 && marks.length > 0 ? (
+                  <span className="cell-notes" aria-hidden="true">
+                    {NOTE_DIGITS.map((digit) => {
+                      const on = marks.includes(digit)
+                      return (
+                        <span
+                          key={digit}
+                          className={[
+                            'cell-note',
+                            on ? 'is-on' : '',
+                            on && activeDigit === digit ? 'is-match' : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                        >
+                          {on ? digit : ''}
+                        </span>
+                      )
+                    })}
+                  </span>
+                ) : null}
                 {showError ? (
                   <span className="cell-error" aria-hidden="true">
                     ×

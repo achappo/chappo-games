@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
-export function useTimer(running: boolean) {
-  const [seconds, setSeconds] = useState(0)
+export function useTimer(running: boolean, initialSeconds = 0) {
+  const [seconds, setSeconds] = useState(initialSeconds)
 
   useEffect(() => {
     if (!running) return
@@ -11,8 +11,8 @@ export function useTimer(running: boolean) {
     return () => window.clearInterval(id)
   }, [running])
 
-  const reset = useCallback(() => {
-    setSeconds(0)
+  const reset = useCallback((value = 0) => {
+    setSeconds(value)
   }, [])
 
   return { seconds, reset }
