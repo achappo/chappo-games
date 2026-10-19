@@ -4,6 +4,7 @@ export interface ScoreEntry {
   score: number
   seconds: number
   mistakes: number
+  hintsUsed: number
   difficulty: Difficulty
   completedAt: string
 }
@@ -33,32 +34,36 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
 
 const STORAGE_KEY = 'sudoku-scores'
 
+export const HINTS_PER_GAME = 3
+
 const BASE = { easy: 5_000, medium: 8_000, hard: 12_000 } as const
-const POINTS_PER_SECOND = 8
 const POINTS_PER_MISTAKE = 150
-const PERFECT_BONUS = 400
+const UNUSED_HINT_BONUS = 400
+const CLEAN_BONUS = 400
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
 
 export function liveScore(
   difficulty: Difficulty,
-  seconds: number,
   mistakes: number,
+  hintsUsed: number,
 ): number {
+  const used = Math.min(HINTS_PER_GAME, Math.max(0, hintsUsed))
+  const unused = HINTS_PER_GAME - used
   const raw =
     BASE[difficulty] -
-    Math.max(0, seconds) * POINTS_PER_SECOND -
-    Math.max(0, mistakes) * POINTS_PER_MISTAKE
+    Math.max(0, mistakes) * POINTS_PER_MISTAKE +
+    unused * UNUSED_HINT_BONUS
   return Math.max(0, raw)
 }
 
 export function finalScore(
   difficulty: Difficulty,
-  seconds: number,
   mistakes: number,
+  hintsUsed: number,
 ): number {
-  const bonus = mistakes === 0 ? PERFECT_BONUS : 0
-  return liveScore(difficulty, seconds, mistakes) + bonus
+  const clean = mistakes === 0 ? CLEAN_BONUS : 0
+  return liveScore(difficulty, mistakes, hintsUsed) + clean
 }
 
 function emptyBoard(): ScoreBoard {
@@ -83,8 +88,9 @@ function isScoreEntry(value: unknown): value is ScoreEntry {
 
 function compareEntries(a: ScoreEntry, b: ScoreEntry): number {
   if (b.score !== a.score) return b.score - a.score
-  if (a.seconds !== b.seconds) return a.seconds - b.seconds
-  return a.mistakes - b.mistakes
+  if (a.mistakes !== b.mistakes) return a.mistakes - b.mistakes
+  if (a.hintsUsed !== b.hintsUsed) return a.hintsUsed - b.hintsUsed
+  return a.seconds - b.seconds
 }
 
 function sanitizeList(list: unknown, difficulty: Difficulty): ScoreEntry[] {
@@ -95,6 +101,10 @@ function sanitizeList(list: unknown, difficulty: Difficulty): ScoreEntry[] {
       score: Math.max(0, Math.floor(entry.score)),
       seconds: Math.max(0, Math.floor(entry.seconds)),
       mistakes: Math.max(0, Math.floor(entry.mistakes)),
+      hintsUsed: Math.min(
+        HINTS_PER_GAME,
+        Math.max(0, Math.floor(entry.hintsUsed ?? 0)),
+      ),
       difficulty,
       completedAt: entry.completedAt,
     }))
@@ -128,11 +138,13 @@ export function recordScore(
   difficulty: Difficulty,
   seconds: number,
   mistakes: number,
+  hintsUsed: number,
 ): RecordResult {
   const entry: ScoreEntry = {
-    score: finalScore(difficulty, seconds, mistakes),
+    score: finalScore(difficulty, mistakes, hintsUsed),
     seconds,
     mistakes,
+    hintsUsed: Math.min(HINTS_PER_GAME, Math.max(0, hintsUsed)),
     difficulty,
     completedAt: new Date().toISOString(),
   }

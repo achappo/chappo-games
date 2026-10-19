@@ -4,14 +4,16 @@ import {
   type ScoreBoard,
   type ScoreEntry,
 } from '../lib/scores'
-import type { Theme } from '../lib/settings'
+import type { Settings, Theme } from '../lib/settings'
 import { formatTime } from '../lib/sudoku'
 import './Settings.css'
 
 interface SettingsPanelProps {
   open: boolean
+  settings: Settings
   scores: ScoreBoard
   onClose: () => void
+  onChange: (next: Settings) => void
 }
 
 const DIFFICULTY_ORDER: Difficulty[] = ['easy', 'medium', 'hard']
@@ -20,7 +22,18 @@ function mistakesLabel(count: number): string {
   return count === 1 ? '1 mistake' : `${count} mistakes`
 }
 
-function ScoreList({ entries }: { entries: ScoreEntry[] }) {
+function hintsLabel(count: number): string {
+  if (count === 0) return 'no hints'
+  return count === 1 ? '1 hint' : `${count} hints`
+}
+
+function ScoreList({
+  entries,
+  showTimer,
+}: {
+  entries: ScoreEntry[]
+  showTimer: boolean
+}) {
   if (entries.length === 0) {
     return <p className="scores-empty">No scores yet</p>
   }
@@ -32,7 +45,8 @@ function ScoreList({ entries }: { entries: ScoreEntry[] }) {
           <span className="scores-rank">{index + 1}</span>
           <span className="scores-points">{entry.score.toLocaleString()}</span>
           <span className="scores-meta">
-            {formatTime(entry.seconds)} · {mistakesLabel(entry.mistakes)}
+            {showTimer ? `${formatTime(entry.seconds)} · ` : ''}
+            {mistakesLabel(entry.mistakes)} · {hintsLabel(entry.hintsUsed)}
           </span>
         </li>
       ))}
@@ -42,8 +56,10 @@ function ScoreList({ entries }: { entries: ScoreEntry[] }) {
 
 export function SettingsPanel({
   open,
+  settings,
   scores,
   onClose,
+  onChange,
 }: SettingsPanelProps) {
   if (!open) return null
 
@@ -68,6 +84,25 @@ export function SettingsPanel({
           </button>
         </div>
 
+        <label className="settings-row">
+          <div className="settings-copy">
+            <span className="settings-name">Show timer</span>
+            <span className="settings-desc">
+              Keep a clock in the header. Leave it off to play unhurried.
+            </span>
+          </div>
+          <input
+            type="checkbox"
+            checked={settings.showTimer}
+            onChange={(e) =>
+              onChange({
+                ...settings,
+                showTimer: e.target.checked,
+              })
+            }
+          />
+        </label>
+
         <section className="scores-section" aria-labelledby="high-scores-title">
           <h3 id="high-scores-title" className="scores-heading">
             High scores
@@ -76,7 +111,10 @@ export function SettingsPanel({
           {DIFFICULTY_ORDER.map((level) => (
             <div key={level} className="scores-group">
               <h4 className="scores-difficulty">{DIFFICULTY_LABELS[level]}</h4>
-              <ScoreList entries={scores[level]} />
+              <ScoreList
+                entries={scores[level]}
+                showTimer={settings.showTimer}
+              />
             </div>
           ))}
         </section>

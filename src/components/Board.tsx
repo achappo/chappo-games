@@ -9,6 +9,7 @@ interface BoardProps {
   givens: Grid
   notes: NotesGrid
   activeDigit: Digit | null
+  selectedCell: { r: number; c: number } | null
   errorCell: { r: number; c: number } | null
   onCellTap: (r: number, c: number) => void
 }
@@ -22,6 +23,7 @@ export function Board({
   givens,
   notes,
   activeDigit,
+  selectedCell,
   errorCell,
   onCellTap,
 }: BoardProps) {
@@ -34,6 +36,8 @@ export function Board({
             const marks = notes[r][c]
             const highlighted =
               activeDigit !== null && value === (activeDigit as CellValue)
+            const selected =
+              value === 0 && selectedCell?.r === r && selectedCell?.c === c
             const showError = errorCell?.r === r && errorCell?.c === c
             const thickRight = c === 2 || c === 5
             const thickBottom = r === 2 || r === 5
@@ -47,6 +51,7 @@ export function Board({
                   'cell',
                   given ? 'is-given' : '',
                   highlighted ? 'is-digit-match' : '',
+                  selected ? 'is-selected' : '',
                   value === 0 && marks.length > 0 ? 'has-notes' : '',
                   thickRight ? 'thick-right' : '',
                   thickBottom ? 'thick-bottom' : '',

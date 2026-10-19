@@ -2,10 +2,13 @@ export type Theme = 'light' | 'dark'
 
 export interface Settings {
   theme: Theme
+  /** Show a clock in the header. Off by default so play can stay unhurried. */
+  showTimer: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'light',
+  showTimer: false,
 }
 
 const STORAGE_KEY = 'sudoku-settings'
@@ -17,6 +20,7 @@ export function loadSettings(): Settings {
     const parsed = JSON.parse(raw) as Partial<Settings>
     return {
       theme: parsed.theme === 'dark' ? 'dark' : 'light',
+      showTimer: parsed.showTimer === true,
     }
   } catch {
     return { ...DEFAULT_SETTINGS }

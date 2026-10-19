@@ -72,6 +72,11 @@
   background: var(--accent-soft);
 }
 
+.cell.is-selected:not(.is-digit-match) {
+  box-shadow: inset 0 0 0 2px var(--ink);
+  background: var(--accent-press);
+}
+
 .cell-value {
   pointer-events: none;
 }

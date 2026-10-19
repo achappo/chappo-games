@@ -1,5 +1,6 @@
 import { emptyNotes, type NotesGrid } from './notes'
 import type { Difficulty, LoadedPuzzle } from './puzzles'
+import { HINTS_PER_GAME } from './scores'
 import {
   parsePuzzle,
   stringifyGrid,
@@ -13,6 +14,7 @@ export interface RestoredGame {
   notes: NotesGrid
   seconds: number
   mistakes: number
+  hintsUsed: number
   pencilMode: boolean
   activeDigit: Digit | null
 }
@@ -27,6 +29,7 @@ interface SavedGame {
   notes: string[]
   seconds: number
   mistakes: number
+  hintsUsed: number
   pencilMode: boolean
   activeDigit: Digit | null
 }
@@ -89,6 +92,15 @@ function parseSaved(raw: string): RestoredGame | null {
   if (parsed.seconds < 0 || parsed.mistakes < 0) return null
   const seconds = parsed.seconds
   const mistakes = parsed.mistakes
+  const hintsUsed =
+    parsed.hintsUsed === undefined
+      ? 0
+      : typeof parsed.hintsUsed === 'number' &&
+          Number.isFinite(parsed.hintsUsed) &&
+          parsed.hintsUsed >= 0
+        ? Math.min(HINTS_PER_GAME, Math.floor(parsed.hintsUsed))
+        : null
+  if (hintsUsed === null) return null
 
   const givens = parsePuzzle(parsed.givens)
   const solution = parsePuzzle(parsed.solution)
@@ -130,6 +142,7 @@ function parseSaved(raw: string): RestoredGame | null {
     notes,
     seconds: Math.floor(seconds),
     mistakes: Math.floor(mistakes),
+    hintsUsed,
     pencilMode: Boolean(parsed.pencilMode),
     activeDigit: isDigit(activeDigit) ? activeDigit : null,
   }
@@ -156,6 +169,7 @@ export function saveGame(game: RestoredGame): void {
     notes: flattenNotes(game.notes),
     seconds: game.seconds,
     mistakes: game.mistakes,
+    hintsUsed: game.hintsUsed,
     pencilMode: game.pencilMode,
     activeDigit: game.activeDigit,
   }

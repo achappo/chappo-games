@@ -101,7 +101,9 @@
 }
 
 .scores-section {
-  padding-top: 0.15rem;
+  margin-top: 0.35rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line-soft);
 }
 
 .scores-heading {

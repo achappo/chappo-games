@@ -16,6 +16,7 @@ import {
   type LoadedPuzzle,
 } from './lib/puzzles'
 import {
+  HINTS_PER_GAME,
   liveScore,
   loadScores,
   recordScore,
@@ -85,6 +86,11 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [settings, setSettings] = useState<Settings>(() => loadSettings())
   const [mistakes, setMistakes] = useState(() => restored?.mistakes ?? 0)
+  const [hintsUsed, setHintsUsed] = useState(() => restored?.hintsUsed ?? 0)
+  const [selectedCell, setSelectedCell] = useState<{
+    r: number
+    c: number
+  } | null>(null)
   const [scores, setScores] = useState(() => loadScores())
   const [lastWin, setLastWin] = useState<RecordResult | null>(null)
 
@@ -112,6 +118,8 @@ export default function App() {
     setPencilMode(false)
     setErrorCell(null)
     setMistakes(0)
+    setHintsUsed(0)
+    setSelectedCell(null)
     setLastWin(null)
     setNotes(emptyNotes())
     clearSavedGame()
@@ -142,10 +150,21 @@ export default function App() {
       notes,
       seconds,
       mistakes,
+      hintsUsed,
       pencilMode,
       activeDigit,
     })
-  }, [status, puzzle, grid, notes, seconds, mistakes, pencilMode, activeDigit])
+  }, [
+    status,
+    puzzle,
+    grid,
+    notes,
+    seconds,
+    mistakes,
+    hintsUsed,
+    pencilMode,
+    activeDigit,
+  ])
 
   useEffect(() => {
     if (!errorCell) return
@@ -160,12 +179,67 @@ export default function App() {
   }
 
   function handleSelectDigit(digit: Digit) {
-    setActiveDigit(digit)
+    setActiveDigit((current) => (current === digit ? null : digit))
   }
 
   function handleDifficultyChange(level: Difficulty) {
     setDifficulty(level)
     void startPuzzle(level)
+  }
+
+  function finishIfComplete(
+    next: Grid,
+    nextMistakes: number,
+    nextHintsUsed: number,
+  ) {
+    if (!puzzle || !isComplete(next)) return false
+    const result = recordScore(
+      scores,
+      puzzle.difficulty,
+      seconds,
+      nextMistakes,
+      nextHintsUsed,
+    )
+    saveScores(result.board)
+    setScores(result.board)
+    setLastWin(result)
+    setStatus('won')
+    clearSavedGame()
+    return true
+  }
+
+  function placeDigit(r: number, c: number, digit: Digit) {
+    if (!grid) return
+    const next = cloneGrid(grid)
+    next[r][c] = digit
+    setGrid(next)
+    setNotes((current) => clearNotesForPlacement(current, r, c, digit))
+    setSelectedCell(null)
+    const counts = countDigits(next)
+    if (counts[digit] >= 9) {
+      setActiveDigit(null)
+    }
+    finishIfComplete(next, mistakes, hintsUsed)
+  }
+
+  function handleHint() {
+    if (!puzzle || !grid || status !== 'ready') return
+    if (hintsUsed >= HINTS_PER_GAME || !selectedCell) return
+    const { r, c } = selectedCell
+    if (grid[r][c] !== 0) return
+    const digit = puzzle.solution[r][c] as Digit
+    const nextHints = hintsUsed + 1
+    setHintsUsed(nextHints)
+    const next = cloneGrid(grid)
+    next[r][c] = digit
+    setGrid(next)
+    setNotes((current) => clearNotesForPlacement(current, r, c, digit))
+    setSelectedCell(null)
+    const counts = countDigits(next)
+    if (counts[digit] >= 9) {
+      setActiveDigit(null)
+    }
+    finishIfComplete(next, mistakes, nextHints)
   }
 
   function handleCellTap(r: number, c: number) {
@@ -174,10 +248,15 @@ export default function App() {
     const value = grid[r][c]
     if (value !== 0) {
       setActiveDigit(value as Digit)
+      setSelectedCell(null)
       return
     }
 
-    if (status !== 'ready' || activeDigit === null) return
+    if (status !== 'ready') return
+
+    setSelectedCell({ r, c })
+
+    if (activeDigit === null) return
 
     if (pencilMode) {
       setNotes((current) => toggleNote(current, r, c, activeDigit))
@@ -190,36 +269,20 @@ export default function App() {
       return
     }
 
-    const next = cloneGrid(grid)
-    next[r][c] = activeDigit
-    setGrid(next)
-    setNotes((current) =>
-      clearNotesForPlacement(current, r, c, activeDigit),
-    )
-
-    const counts = countDigits(next)
-    if (counts[activeDigit] >= 9) {
-      setActiveDigit(null)
-    }
-
-    if (isComplete(next)) {
-      const result = recordScore(scores, puzzle.difficulty, seconds, mistakes)
-      saveScores(result.board)
-      setScores(result.board)
-      setLastWin(result)
-      setStatus('won')
-      clearSavedGame()
-    }
+    placeDigit(r, c, activeDigit)
   }
 
+  const hintsLeft = Math.max(0, HINTS_PER_GAME - hintsUsed)
   const score =
     lastWin?.entry.score ??
-    (puzzle ? liveScore(puzzle.difficulty, seconds, mistakes) : 0)
+    (puzzle ? liveScore(puzzle.difficulty, mistakes, hintsUsed) : 0)
 
   return (
     <div className="app">
       <Header
+        showTimer={settings.showTimer}
         timeLabel={formatTime(seconds)}
+        hintsLeft={hintsLeft}
         score={score}
         theme={settings.theme}
         onThemeChange={(theme) =>
@@ -264,13 +327,17 @@ export default function App() {
               givens={puzzle.givens}
               notes={notes}
               activeDigit={activeDigit}
+              selectedCell={selectedCell}
               errorCell={errorCell}
               onCellTap={handleCellTap}
             />
             {status === 'won' && lastWin && (
               <p className="win-banner" role="status">
-                Complete — {formatTime(lastWin.entry.seconds)} ·{' '}
-                {lastWin.entry.score.toLocaleString()}
+                Complete
+                {settings.showTimer
+                  ? ` — ${formatTime(lastWin.entry.seconds)}`
+                  : ''}{' '}
+                · {lastWin.entry.score.toLocaleString()}
                 {lastWin.isNewBest
                   ? ' · New best'
                   : lastWin.rank
@@ -286,13 +353,23 @@ export default function App() {
         activeDigit={activeDigit}
         finishedDigits={finishedDigits}
         pencilMode={pencilMode}
+        hintsLeft={hintsLeft}
+        hintDisabled={
+          status !== 'ready' ||
+          hintsLeft === 0 ||
+          selectedCell === null ||
+          Boolean(grid && selectedCell && grid[selectedCell.r][selectedCell.c] !== 0)
+        }
         onSelect={handleSelectDigit}
         onTogglePencil={() => setPencilMode((on) => !on)}
+        onHint={handleHint}
       />
 
       <SettingsPanel
         open={settingsOpen}
+        settings={settings}
         onClose={() => setSettingsOpen(false)}
+        onChange={handleSettingsChange}
         scores={scores}
       />
     </div>

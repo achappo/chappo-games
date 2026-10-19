@@ -3,7 +3,9 @@ import './Header.css'
 import { SettingsButton, ThemeToggle } from './Settings'
 
 interface HeaderProps {
+  showTimer: boolean
   timeLabel: string
+  hintsLeft: number
   score: number
   theme: Theme
   onThemeChange: (theme: Theme) => void
@@ -11,7 +13,9 @@ interface HeaderProps {
 }
 
 export function Header({
+  showTimer,
   timeLabel,
+  hintsLeft,
   score,
   theme,
   onThemeChange,
@@ -19,9 +23,21 @@ export function Header({
 }: HeaderProps) {
   return (
     <header className="game-header">
-      <div className="header-side header-timer" aria-live="polite">
-        <span className="header-label">Time</span>
-        <span className="header-value">{timeLabel}</span>
+      <div
+        className="header-side header-timer"
+        aria-live={showTimer ? 'polite' : 'off'}
+      >
+        {showTimer ? (
+          <>
+            <span className="header-label">Time</span>
+            <span className="header-value">{timeLabel}</span>
+          </>
+        ) : (
+          <>
+            <span className="header-label">Hints</span>
+            <span className="header-value">{hintsLeft}</span>
+          </>
+        )}
       </div>
       <div className="header-center">
         <ThemeToggle theme={theme} onChange={onThemeChange} />
