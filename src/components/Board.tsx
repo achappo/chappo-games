@@ -2,8 +2,6 @@ import type { NotesGrid } from '../lib/notes'
 import type { CellValue, Digit, Grid } from '../lib/sudoku'
 import './Board.css'
 
-const NOTE_DIGITS: Digit[] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
 interface BoardProps {
   grid: Grid
   givens: Grid
@@ -72,24 +70,24 @@ export function Board({
                   {value === 0 ? '0' : value}
                 </span>
                 {value === 0 && marks.length > 0 ? (
-                  <span className="cell-notes" aria-hidden="true">
-                    {NOTE_DIGITS.map((digit) => {
-                      const on = marks.includes(digit)
-                      return (
-                        <span
-                          key={digit}
-                          className={[
-                            'cell-note',
-                            on ? 'is-on' : '',
-                            on && activeDigit === digit ? 'is-match' : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                        >
-                          {on ? digit : ''}
-                        </span>
-                      )
-                    })}
+                  <span
+                    className="cell-notes"
+                    data-count={marks.length}
+                    aria-hidden="true"
+                  >
+                    {marks.map((digit) => (
+                      <span
+                        key={digit}
+                        className={[
+                          'cell-note',
+                          activeDigit === digit ? 'is-match' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                      >
+                        {digit}
+                      </span>
+                    ))}
                   </span>
                 ) : null}
                 {showError ? (

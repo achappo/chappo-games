@@ -87,21 +87,61 @@
 
 .cell-notes {
   position: absolute;
-  inset: 0.08rem;
+  inset: 0.05rem;
   display: grid;
+  pointer-events: none;
+}
+
+.cell-notes[data-count='1'] {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.cell-notes[data-count='2'],
+.cell-notes[data-count='3'],
+.cell-notes[data-count='4'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.cell-notes[data-count='5'],
+.cell-notes[data-count='6'] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.cell-notes[data-count='7'],
+.cell-notes[data-count='8'],
+.cell-notes[data-count='9'] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: repeat(3, minmax(0, 1fr));
-  pointer-events: none;
 }
 
 .cell-note {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(0.42rem, 2.15vw, 0.62rem);
   font-weight: 600;
   line-height: 1;
   color: var(--ink-muted);
+}
+
+.cell-notes[data-count='1'] .cell-note,
+.cell-notes[data-count='2'] .cell-note,
+.cell-notes[data-count='3'] .cell-note,
+.cell-notes[data-count='4'] .cell-note {
+  font-size: 0.7em;
+}
+
+.cell-notes[data-count='5'] .cell-note,
+.cell-notes[data-count='6'] .cell-note {
+  font-size: 0.48em;
+}
+
+.cell-notes[data-count='7'] .cell-note,
+.cell-notes[data-count='8'] .cell-note,
+.cell-notes[data-count='9'] .cell-note {
+  font-size: 0.4em;
 }
 
 .cell-note.is-match {
